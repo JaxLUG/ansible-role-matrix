@@ -1,0 +1,46 @@
+---
+- name: Configure lighttpd
+  tags: lighttpd
+  notify: Restart lighttpd
+  copy: src=files{{ item }} dest={{ item }} mode=0644 group=root owner=root
+  with_items:
+    - /etc/lighttpd/lighttpd.conf
+
+- name: Configure synapse delegation
+  tags: synapse
+  template:
+    dest: {{ item }}
+    src: templates{{ item }}.j2
+    mode: 0644
+    group: root
+    owner: root
+    backup: yes
+  with_items:
+    - /var/www/localhost/htdocs/.well-known/matrix/client.json
+    - /var/www/localhost/htdocs/.well-known/matrix/server.json
+
+- name: Copy synapse files
+  tags: synapse
+  copy:
+    dest: {{ item }}
+    src: ../files/{{ inventory_hostname }}{{ item }}
+    mode: 0644
+    group: synapse
+    owner: synapse
+  with_items:
+    - /etc/synapse/{{ homeserver }}.log.config
+    - /etc/synapse/{{ homeserver }}.signing.key
+
+- name: Configure synapse
+  tags: synapse
+  notify: Restart synapse
+  template:
+    dest: {{ item }}
+    src: templates{{ item }}.j2
+    mode: 0644
+    group: synapse
+    owner: synapse
+    backup: yes
+  with_items:
+    - /etc/synapse/homeserver.yaml
+
