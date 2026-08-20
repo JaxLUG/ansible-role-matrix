@@ -1,0 +1,78 @@
+# Configuration file for Synapse.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+#
+# For more information on how to configure Synapse, including a complete accounting of
+# each option, go to docs/usage/configuration/config_documentation.md or
+# https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+server_name: "{{ inventory_hostname }}"
+pid_file: /var/lib/synapse/homeserver.pid
+listeners:
+  - path: /var/lib/synapse/main_public.sock
+    type: http
+    resources:
+      - names: [client, federation]
+database:
+  name: psycopg2
+  args:
+    user: {{ dbuser }}
+    password: {{ dbpassword }}
+    dbname: synapse
+    host: 127.0.0.1
+    cp_min: 5
+    cp_max: 10
+log_config: "/etc/synapse/{{ inventory_hostname }}.log.config"
+media_store_path: /var/lib/synapse/media_store
+registration_shared_secret: {{ registration_shared_secret }}
+report_stats: false
+macaroon_secret_key: {{ macaroon_secret_key }}
+form_secret: {{ form_secret }}
+public_baseurl: "https://{{ inventory_hostname }}"
+signing_key_path: "/etc/synapse/{{ inventory_hostname }}.signing.key"
+trusted_key_servers:
+  - server_name: "matrix.org"
+serve_server_wellknown: true
+public_baseurl: "https://{{ inventory_hostname }}"
+suppress_key_server_warning: true
+enable_registration: true
+enable_registration_captcha: true
+#registration_shared_secret: "{{ registration_shared_secret }}"
+#enable_registration_without_verification: true
+
+email:
+  smtp_host: "{{ smtp_host }}"
+  smtp_port: "465"
+#  smtp_user: exampleusername
+#  smtp_pass: examplepassword
+#  force_tls: true
+#  require_transport_security: true
+#  enable_tls: true
+  tlsname: {{ smtp_host }}
+  notif_from: Your Friendly %(app)s homeserver <noreply@j{{ domain }}>
+  app_name: {{ inventory_hostname }}
+  enable_notifs: true
+  notif_for_new_users: false
+#  client_base_url: http://localhost/riot
+  validation_token_lifetime: 15m
+  invite_client_location: https://app.element.io
+  subjects:
+    message_from_person_in_room: '[%(app)s] You have a message on %(app)s from %(person)s 
+      in the %(room)s room...'
+    message_from_person: '[%(app)s] You have a message on %(app)s from %(person)s...'
+    messages_from_person: '[%(app)s] You have messages on %(app)s from %(person)s...'
+    messages_in_room: '[%(app)s] You have messages on %(app)s in the %(room)s room...'
+    messages_in_room_and_others: '[%(app)s] You have messages on %(app)s in the %(room)s
+      room and others...'
+    messages_from_person_and_others: '[%(app)s] You have messages on %(app)s from
+      %(person)s and others...'
+    invite_from_person_to_room: '[%(app)s] %(person)s has invited you to join the
+      %(room)s room on %(app)s...'
+    invite_from_person: '[%(app)s] %(person)s has invited you to chat on %(app)s...'
+    password_reset: '[%(server_name)s] Password reset'
+    email_validation: '[%(server_name)s] Validate your email'
+
+# vim:ft=yaml
