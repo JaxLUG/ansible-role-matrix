@@ -1,0 +1,6 @@
+---
+- name: Restart lighttpd
+  action: command /etc/init.d/lighttpd restart
+
+- name: Restart synapse
+  action: command /etc/init.d/synapse restart
